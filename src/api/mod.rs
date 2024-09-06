@@ -109,7 +109,17 @@ impl BitcoinDB {
             return Err(OpError::from("data_dir does not exist"));
         }
         let blk_path = p.join("blocks");
-        let index_path = blk_path.join("index");
+        let original_index_path = blk_path.join("index");
+        let temp_index_path = blk_path.join("temp_index");
+        
+        std::process::Command::new("cp")
+            .arg("-R")
+            .arg(&original_index_path)
+            .arg(&temp_index_path)
+            .output()
+            .expect("无法复制索引文件夹");
+        
+        let index_path = temp_index_path;
         let block_index = BlockIndex::new(index_path.as_path())?;
         let tx_db = if tx_index {
             let tx_index_path = p.join("indexes").join("txindex");
