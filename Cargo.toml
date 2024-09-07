@@ -28,6 +28,8 @@ db-key = "=0.0.5"
 hash_hasher = "^2.0.3"
 rocksdb = { version = "0.20.1", optional = true }
 tempdir = { version = "^0.3.7", optional = true }
+file_diff = "1.0.0"
+walkdir = "2.3.2"
 
 [lib]
 name = "bitcoin_explorer"
