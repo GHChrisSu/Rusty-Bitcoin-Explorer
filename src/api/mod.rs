@@ -111,21 +111,29 @@ impl BitcoinDB {
         let blk_path = p.join("blocks");
         let original_index_path = blk_path.join("index");
         let temp_index_path = blk_path.join("temp_index");
-        
+
+        use file_diff::diff;
         use std::fs;
         use walkdir::WalkDir;
-        use file_diff::diff;
 
         for entry in WalkDir::new(&original_index_path) {
             let entry = entry.unwrap();
             if entry.path().is_file() {
-                let temp_file_path = temp_index_path.join(entry.path().strip_prefix(&original_index_path).unwrap());
-                if !temp_file_path.exists() || diff(entry.path().to_str().unwrap(), temp_file_path.to_str().unwrap()) {
-                    fs::copy(entry.path(), &temp_file_path).expect(format!("Failed to copy file: {}", entry.path().display()).as_str());
+                let file_name = entry.path().file_name().unwrap();
+                let temp_file_path = temp_index_path.join(file_name);
+                if !temp_file_path.exists()
+                    || diff(
+                        entry.path().to_str().unwrap(),
+                        temp_file_path.to_str().unwrap(),
+                    )
+                {
+                    fs::copy(entry.path(), &temp_file_path).expect(
+                        format!("Failed to copy file: {}", entry.path().display()).as_str(),
+                    );
                 }
             }
         }
-        
+
         let index_path = temp_index_path;
         let block_index = BlockIndex::new(index_path.as_path())?;
         let tx_db = if tx_index {
